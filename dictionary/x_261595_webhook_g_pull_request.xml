@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?><database>
+    <element label="Pull Request" max_length="40" name="x_261595_webhook_g_pull_request" type="collection">
+        <element label="Action" max_length="20" name="action" type="string"/>
+        <element label="Github PR Number" max_length="40" name="github_pr_number" type="string"/>
+        <element label="HTML URL" max_length="250" name="html_url" type="string"/>
+        <element label="ID" max_length="20" name="id" type="string"/>
+        <element attributes="ignore_filter_on_new=true" default="javascript:global.getNextObjNumberPadded();" label="Number" max_length="40" name="number" type="string"/>
+        <element label="Repository" max_length="32" name="repository" reference="x_261595_webhook_g_repository" type="reference"/>
+        <element label="State" max_length="20" name="state" type="string"/>
+        <element label="Url" max_length="250" name="url" type="string"/>
+        <element label="User" max_length="32" name="user" reference="x_261595_webhook_g_user" type="reference"/>
+        <index name="index">
+            <element name="repository"/>
+        </index>
+        <index name="index2">
+            <element name="user"/>
+        </index>
+    </element>
+</database>

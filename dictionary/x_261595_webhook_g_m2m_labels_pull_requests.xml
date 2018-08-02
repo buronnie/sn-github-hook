@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?><database>
+    <element label="Webhook G M2m Labels Pull Requests" max_length="40" name="x_261595_webhook_g_m2m_labels_pull_requests" type="collection">
+        <element label="Label" max_length="32" name="label" reference="x_261595_webhook_g_label" type="reference"/>
+        <element label="Pull Request" max_length="32" name="pull_request" reference="x_261595_webhook_g_pull_request" type="reference"/>
+        <index name="index">
+            <element name="pull_request"/>
+        </index>
+        <index name="index2">
+            <element name="label"/>
+        </index>
+    </element>
+</database>
