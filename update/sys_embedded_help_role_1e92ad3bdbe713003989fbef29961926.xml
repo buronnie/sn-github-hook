@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_embedded_help_role">
+    <sys_embedded_help_role action="INSERT_OR_UPDATE">
+        <order>1000</order>
+        <role display_value="x_261595_webhook_g.team_user" name="x_261595_webhook_g.team_user">da92ad3bdbe713003989fbef29961924</role>
+        <sys_class_name>sys_embedded_help_role</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2018-08-02 20:52:45</sys_created_on>
+        <sys_id>1e92ad3bdbe713003989fbef29961926</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>da92ad3bdbe713003989fbef29961924</sys_name>
+        <sys_package display_value="webhook-github" source="x_261595_webhook_g">66ba1623db2313003989fbef29961966</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="webhook-github">66ba1623db2313003989fbef29961966</sys_scope>
+        <sys_update_name>sys_embedded_help_role_1e92ad3bdbe713003989fbef29961926</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2018-08-02 20:52:45</sys_updated_on>
+    </sys_embedded_help_role>
+</record_update>

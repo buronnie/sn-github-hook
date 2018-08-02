@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?><record_update>
-    <sys_dictionary action="INSERT_OR_UPDATE" element="url" table="x_261595_webhook_g_pull_request">
+    <sys_dictionary action="INSERT_OR_UPDATE" element="pr_label" table="x_261595_webhook_g_team">
         <active>true</active>
         <array>false</array>
         <array_denormalized>false</array_denormalized>
@@ -14,7 +14,7 @@
         <choice/>
         <choice_field/>
         <choice_table/>
-        <column_label>Url</column_label>
+        <column_label>PR Label</column_label>
         <comments/>
         <create_roles/>
         <default_value/>
@@ -27,20 +27,20 @@
         <dynamic_creation_script/>
         <dynamic_default_value/>
         <dynamic_ref_qual/>
-        <element>url</element>
+        <element>pr_label</element>
         <element_reference>false</element_reference>
         <foreign_database/>
         <function_definition/>
         <function_field>false</function_field>
-        <internal_type display_value="String">string</internal_type>
+        <internal_type display_value="Reference">reference</internal_type>
         <mandatory>false</mandatory>
-        <max_length>250</max_length>
-        <name>x_261595_webhook_g_pull_request</name>
+        <max_length>32</max_length>
+        <name>x_261595_webhook_g_team</name>
         <next_element/>
         <primary>false</primary>
         <read_only>false</read_only>
         <read_roles/>
-        <reference/>
+        <reference display_value="" name="x_261595_webhook_g_label">x_261595_webhook_g_label</reference>
         <reference_cascade_rule/>
         <reference_floats>false</reference_floats>
         <reference_key/>
@@ -52,16 +52,16 @@
         <staged>false</staged>
         <sys_class_name>sys_dictionary</sys_class_name>
         <sys_created_by>admin</sys_created_by>
-        <sys_created_on>2018-08-02 06:55:19</sys_created_on>
-        <sys_id>dfc1662fdb2313003989fbef29961968</sys_id>
+        <sys_created_on>2018-08-02 20:52:45</sys_created_on>
+        <sys_id>fce165b7dbe713003989fbef2996190e</sys_id>
         <sys_mod_count>0</sys_mod_count>
-        <sys_name>Url</sys_name>
+        <sys_name>PR Label</sys_name>
         <sys_package display_value="webhook-github" source="x_261595_webhook_g">66ba1623db2313003989fbef29961966</sys_package>
         <sys_policy/>
         <sys_scope display_value="webhook-github">66ba1623db2313003989fbef29961966</sys_scope>
-        <sys_update_name>sys_dictionary_x_261595_webhook_g_pull_request_url</sys_update_name>
+        <sys_update_name>sys_dictionary_x_261595_webhook_g_team_pr_label</sys_update_name>
         <sys_updated_by>admin</sys_updated_by>
-        <sys_updated_on>2018-08-02 06:55:19</sys_updated_on>
+        <sys_updated_on>2018-08-02 20:52:45</sys_updated_on>
         <table_reference>false</table_reference>
         <text_index>false</text_index>
         <unique>false</unique>

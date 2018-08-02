@@ -10,8 +10,83 @@
         <operation_script><![CDATA[(function process(/*RESTAPIRequest*/ request, /*RESTAPIResponse*/ response) {
 	var githubToken = '';
 	var payload = request.body.data;
-	var repoName = payload.repository.name;
-	var prNumber = payload.number;
+	var REPOSITORY_TABLE = 'x_261595_webhook_g_repository';
+	var USER_TABLE = 'x_261595_webhook_g_user';
+	var PULL_REQUEST_TABLE = 'x_261595_webhook_g_pull_request';
+	var TEAM_TABLE = 'x_261595_webhook_g_team';
+	var LABEL_TABLE = 'x_261595_webhook_g_label';
+	var LABELS = {
+		readyForTest: 'Ready for Testing',
+		testFailed: 'Testing Failed',
+		readyToMerge: 'ready to merge'
+	};
+	
+	function insertRepoIfNotFound(repo) {
+		var gr = new GlideRecord(REPOSITORY_TABLE);
+		gr.addQuery('name', repo.name);
+		gr.query();
+		if (gr.getRowCount() === 0) {
+			var ir = new GlideRecord(REPOSITORY_TABLE);
+			ir.initialize();
+			ir.name = repo.name;
+			ir.url = repo.html_url;
+			ir.insert();
+			return ir;
+		}
+		return gr.next();
+	}
+	
+	function insertUserIfNotFound(user) {
+		var gr = new GlideRecord(USER_TABLE);
+		gr.addQuery('username', user.login);
+		gr.query();
+		if (gr.getRowCount() === 0) {
+			var ir = new GlideRecord(USER_TABLE);
+			ir.initialize();
+			ir.user_name = user.login;
+			ir.insert();
+			return ir;
+		}
+		return gr.next();
+	}
+	
+	function upsertPullRequest() {
+		var pr = payload.pull_request;
+		
+		var gr = new GlideRecord(PULL_REQUEST_TABLE);
+		gr.addQuery('id', pr.id);
+		gr.query();
+		if (gr.getRowCount() === 0) {
+			var ir = new GlideRecord(PULL_REQUEST_TABLE);
+			ir.initialize();
+			ir.github_pr_number = pr.number;
+			ir.id = pr.id;
+			ir.html_url = pr.html_url;
+			ir.state = pr.state;
+			
+			ir.repository = insertRepoIfNotFound(payload.repository);
+			ir.user = insertUserIfNotFound(pr.user);
+			
+			ir.insert();
+			return ir;
+		} else {
+			gr.next();
+			if (gr.state !== pr.state) {
+				gr.state = pr.state;
+				gr.update();
+			}
+			return gr;
+		}
+	}
+	
+	function getTeamLabel(userName) {
+		var userGR = new GlideRecord(USER_TABLE);
+		userGR.addQuery('user_name', userName);
+		userGR.query();
+		userGR.next();
+		
+		return userGR.team.pr_label.name;
+	}
 
 	function addLabels(repoName, prNumber, labels) {
 		var sm = new sn_ws.RESTMessageV2();
@@ -35,7 +110,15 @@
 		return sm.execute();
 	}
 	
-	removeLabel(repoName, prNumber, 'invalid');
+	var prGR = upsertPullRequest();
+	var action = payload.action;
+	var repoName = payload.repository.name;
+	var prNumber = payload.number;
+	switch(action) {
+		case 'opened':
+			var teamLabel = getTeamLabel(payload.pull_request.user.login);
+			addLabels(repoName, prNumber, [teamLabel, LABELS.ready_for_test]);
+	}
 })(request, response);]]></operation_script>
         <operation_uri>/api/x_261595_webhook_g/pull_request_event/label</operation_uri>
         <produces>application/json,application/xml,text/xml</produces>
@@ -50,14 +133,14 @@
         <sys_created_by>admin</sys_created_by>
         <sys_created_on>2018-08-02 07:32:16</sys_created_on>
         <sys_id>60ba2ea3db6313003989fbef2996192a</sys_id>
-        <sys_mod_count>13</sys_mod_count>
+        <sys_mod_count>17</sys_mod_count>
         <sys_name>label</sys_name>
         <sys_package display_value="webhook-github" source="x_261595_webhook_g">66ba1623db2313003989fbef29961966</sys_package>
         <sys_policy/>
         <sys_scope display_value="webhook-github">66ba1623db2313003989fbef29961966</sys_scope>
         <sys_update_name>sys_ws_operation_60ba2ea3db6313003989fbef2996192a</sys_update_name>
         <sys_updated_by>admin</sys_updated_by>
-        <sys_updated_on>2018-08-02 20:48:21</sys_updated_on>
+        <sys_updated_on>2018-08-02 23:15:23</sys_updated_on>
         <web_service_definition display_value="Pull Request Event">c449ae63db6313003989fbef29961964</web_service_definition>
         <web_service_version/>
     </sys_ws_operation>
