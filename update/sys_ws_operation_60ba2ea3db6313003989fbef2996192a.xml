@@ -15,6 +15,7 @@
 	var PULL_REQUEST_TABLE = 'x_261595_webhook_g_pull_request';
 	var TEAM_TABLE = 'x_261595_webhook_g_team';
 	var LABEL_TABLE = 'x_261595_webhook_g_label';
+	var M2M_PR_LABEL_TABLE = 'x_261595_webhook_g_m2m_labels_pull_requests';
 	var LABELS = {
 		readyForTest: 'Ready for Testing',
 		testFailed: 'Testing Failed',
@@ -23,9 +24,8 @@
 	
 	function insertRepoIfNotFound(repo) {
 		var gr = new GlideRecord(REPOSITORY_TABLE);
-		gr.addQuery('name', repo.name);
-		gr.query();
-		if (gr.getRowCount() === 0) {
+		var isFound = gr.get('name', repo.name);
+		if (!isFound) {
 			var ir = new GlideRecord(REPOSITORY_TABLE);
 			ir.initialize();
 			ir.name = repo.name;
@@ -33,30 +33,58 @@
 			ir.insert();
 			return ir;
 		}
-		return gr.next();
+		return gr;
 	}
 	
 	function insertUserIfNotFound(user) {
 		var gr = new GlideRecord(USER_TABLE);
-		gr.addQuery('username', user.login);
-		gr.query();
-		if (gr.getRowCount() === 0) {
+		var isFound = gr.get('user_name', user.login);
+		if (!isFound) {
 			var ir = new GlideRecord(USER_TABLE);
 			ir.initialize();
 			ir.user_name = user.login;
 			ir.insert();
 			return ir;
 		}
-		return gr.next();
+		return gr;
+	}
+	
+	function insertLabelIfNotFound(label) {
+		var gr = new GlideRecord(LABEL_TABLE);
+		var isFound = gr.get('name', label);
+		if (!isFound) {
+			var ir = new GlideRecord(LABEL_TABLE);
+			ir.initialize();
+			ir.name = label;
+			ir.insert();
+			return ir;
+		}
+		return gr;
+	}
+	
+	function insertM2MPRLabelIfNotFound(pr, label) {
+		var m2m = new GlideRecord(M2M_PR_LABEL_TABLE);
+		m2m.addQuery('label.name', label);
+		m2m.addQuery('pull_request.id', pr.id);
+		m2m.query();
+		if (m2m.next()) {
+			return m2m;
+		}
+		var ir = new GlideRecord(M2M_PR_LABEL_TABLE);
+		ir.initialize();
+		ir.label.setDisplayValue(insertLabelIfNotFound(label).name);
+		ir.pull_request.setDisplayValue(pr.id);
+		
+		ir.insert();
+		return ir;
 	}
 	
 	function upsertPullRequest() {
 		var pr = payload.pull_request;
 		
 		var gr = new GlideRecord(PULL_REQUEST_TABLE);
-		gr.addQuery('id', pr.id);
-		gr.query();
-		if (gr.getRowCount() === 0) {
+		var isFound = gr.get('id', pr.id);
+		if (!isFound) {
 			var ir = new GlideRecord(PULL_REQUEST_TABLE);
 			ir.initialize();
 			ir.github_pr_number = pr.number;
@@ -64,13 +92,14 @@
 			ir.html_url = pr.html_url;
 			ir.state = pr.state;
 			
-			ir.repository = insertRepoIfNotFound(payload.repository);
-			ir.user = insertUserIfNotFound(pr.user);
+			var repoGR = insertRepoIfNotFound(payload.repository);
+			ir.repository.setDisplayValue(repoGR.name);
+			var userGR = insertUserIfNotFound(pr.user);
+			ir.user.setDisplayValue(userGR.user_name);
 			
 			ir.insert();
 			return ir;
 		} else {
-			gr.next();
 			if (gr.state !== pr.state) {
 				gr.state = pr.state;
 				gr.update();
@@ -85,13 +114,17 @@
 		userGR.query();
 		userGR.next();
 		
-		return userGR.team.pr_label.name;
+		return String(userGR.team.pr_label.name);
 	}
 
-	function addLabels(repoName, prNumber, labels) {
+	function addLabels(repoName, pr, labels) {
+		for (var i = 0; i < labels.length; i++) {
+			insertM2MPRLabelIfNotFound(pr, labels[i]);
+		}
+		
 		var sm = new sn_ws.RESTMessageV2();
 		var url = 'https://api.github.com/repos/buronnie/' + repoName +
-				  '/issues/' + prNumber + '/labels?access_token=' + githubToken;
+				  '/issues/' + pr.number + '/labels?access_token=' + githubToken;
 		sm.setEndpoint(url);
 		sm.setHttpMethod('POST');
 		sm.setRequestHeader('Content-Type', 'application/json');
@@ -99,10 +132,10 @@
 		return sm.execute();
 	}
 	
-	function removeLabel(repoName, prNumber, removedLabel) {
+	function removeLabel(repoName, pr, removedLabel) {
 		var sm = new sn_ws.RESTMessageV2();
 		var url = 'https://api.github.com/repos/buronnie/' + repoName +
-				  '/issues/' + prNumber + '/labels/' + removedLabel + 
+				  '/issues/' + pr.number + '/labels/' + removedLabel + 
 			      '?access_token=' + githubToken;
 		sm.setEndpoint(url);
 		sm.setHttpMethod('DELETE');
@@ -110,14 +143,13 @@
 		return sm.execute();
 	}
 	
-	var prGR = upsertPullRequest();
+	upsertPullRequest();
 	var action = payload.action;
 	var repoName = payload.repository.name;
-	var prNumber = payload.number;
 	switch(action) {
-		case 'opened':
+		case 'closed':
 			var teamLabel = getTeamLabel(payload.pull_request.user.login);
-			addLabels(repoName, prNumber, [teamLabel, LABELS.ready_for_test]);
+			var res = addLabels(repoName, payload.pull_request, [teamLabel, LABELS.readyForTest]);
 	}
 })(request, response);]]></operation_script>
         <operation_uri>/api/x_261595_webhook_g/pull_request_event/label</operation_uri>
@@ -133,14 +165,14 @@
         <sys_created_by>admin</sys_created_by>
         <sys_created_on>2018-08-02 07:32:16</sys_created_on>
         <sys_id>60ba2ea3db6313003989fbef2996192a</sys_id>
-        <sys_mod_count>17</sys_mod_count>
+        <sys_mod_count>63</sys_mod_count>
         <sys_name>label</sys_name>
         <sys_package display_value="webhook-github" source="x_261595_webhook_g">66ba1623db2313003989fbef29961966</sys_package>
         <sys_policy/>
         <sys_scope display_value="webhook-github">66ba1623db2313003989fbef29961966</sys_scope>
         <sys_update_name>sys_ws_operation_60ba2ea3db6313003989fbef2996192a</sys_update_name>
-        <sys_updated_by>admin</sys_updated_by>
-        <sys_updated_on>2018-08-02 23:15:23</sys_updated_on>
+        <sys_updated_by>kai.guo@snc</sys_updated_by>
+        <sys_updated_on>2018-08-04 04:07:06</sys_updated_on>
         <web_service_definition display_value="Pull Request Event">c449ae63db6313003989fbef29961964</web_service_definition>
         <web_service_version/>
     </sys_ws_operation>
