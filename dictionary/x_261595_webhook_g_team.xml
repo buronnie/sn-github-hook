@@ -2,6 +2,7 @@
     <element label="Team" max_length="40" name="x_261595_webhook_g_team" type="collection">
         <element display="true" label="Name" max_length="100" name="name" type="string"/>
         <element label="PR Label" max_length="32" name="pr_label" reference="x_261595_webhook_g_label" type="reference"/>
+        <element label="Slack Channel Url" max_length="250" name="slack_channel_url" type="string"/>
         <index name="index">
             <element name="pr_label"/>
         </index>

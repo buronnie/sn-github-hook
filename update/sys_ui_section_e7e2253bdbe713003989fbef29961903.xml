@@ -28,6 +28,20 @@
             <sys_user/>
             <type/>
         </sys_ui_element>
+        <sys_ui_element action="INSERT_OR_UPDATE">
+            <element>slack_channel_url</element>
+            <position>2</position>
+            <sys_created_by>kai.guo@snc</sys_created_by>
+            <sys_created_on>2018-08-06 04:46:16</sys_created_on>
+            <sys_id>6fbbaa70dbb313003989fbef299619bc</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_ui_formatter/>
+            <sys_ui_section caption="NULL" display_value="" name="x_261595_webhook_g_team" sys_domain="global" view="Default view">e7e2253bdbe713003989fbef29961903</sys_ui_section>
+            <sys_updated_by>kai.guo@snc</sys_updated_by>
+            <sys_updated_on>2018-08-06 04:46:16</sys_updated_on>
+            <sys_user/>
+            <type/>
+        </sys_ui_element>
         <sys_ui_section action="INSERT_OR_UPDATE">
             <caption/>
             <header>false</header>
